@@ -103,6 +103,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         browserViewController.restorationIdentifier = NSStringFromClass(BrowserViewController.self)
         browserViewController.restorationClass = AppDelegate.self
         browserViewController.automaticallyAdjustsScrollViewInsets = false
+        browserViewController.delegate = self
 
         rootViewController = UINavigationController(rootViewController: browserViewController)
         rootViewController.automaticallyAdjustsScrollViewInsets = false
@@ -446,6 +447,15 @@ extension AppDelegate: MFMailComposeViewControllerDelegate {
         // Dismiss the view controller and start the app up
         controller.dismissViewControllerAnimated(true, completion: nil)
         startApplication(application!, withLaunchOptions: self.launchOptions)
+    }
+}
+
+extension AppDelegate: BrowserViewControllerDelegate {
+    func browserViewControllerDidAppear(browserViewController: BrowserViewController, profile: Profile) {
+        if profile.prefs.stringForKey("latestAppVersion") != appVersion {
+            browserViewController.openURLInNewTab(NSURL(string: "https://support.mozilla.org/1/mobile/\(appVersion)/%OS%/%LOCALE%/new-ios")!)
+        }
+        profile.prefs.setString(appVersion, forKey: "latestAppVersion")
     }
 }
 

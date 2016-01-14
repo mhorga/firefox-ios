@@ -35,7 +35,13 @@ private struct BrowserViewControllerUX {
     private static let BookmarkStarAnimationOffset: CGFloat = 80
 }
 
+protocol BrowserViewControllerDelegate: class {
+    func browserViewControllerDidAppear(browserViewController: BrowserViewController, profile: Profile)
+}
+
 class BrowserViewController: UIViewController {
+    weak var delegate: BrowserViewControllerDelegate?
+
     var homePanelController: HomePanelViewController?
     var webViewContainer: UIView!
     var urlBar: URLBarView!
@@ -521,6 +527,8 @@ class BrowserViewController: UIViewController {
         log.debug("BVC calling super.viewDidAppear.")
         super.viewDidAppear(animated)
         log.debug("BVC done.")
+
+        delegate?.browserViewControllerDidAppear(self, profile: profile)
     }
 
     override func viewWillDisappear(animated: Bool) {
