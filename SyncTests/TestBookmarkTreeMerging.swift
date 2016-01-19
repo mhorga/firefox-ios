@@ -71,6 +71,15 @@ private func getBrowserDBForFile(filename: String, files: FileAccessor) -> Brows
 class TestBookmarkTreeMerging: XCTestCase {
     let files = MockFiles()
 
+    // This is how to make an assertion failure stop the current test function
+    // but continue with other test functions in the same test case.
+    // See http://stackoverflow.com/a/27016786/22003
+    override func invokeTest() {
+        self.continueAfterFailure = false
+        defer { self.continueAfterFailure = true }
+        super.invokeTest()
+    }
+
     override func tearDown() {
         do {
             try self.files.removeFilesInDirectory()
