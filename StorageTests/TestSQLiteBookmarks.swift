@@ -87,21 +87,6 @@ private extension BrowserDB {
     }
 }
 
-// MARK: - The messy way to extend non-protocol generics.
-
-protocol Succeedable {
-    var isSuccess: Bool { get }
-}
-
-extension Maybe: Succeedable {
-}
-
-private extension Deferred where T: Succeedable {
-    func succeeded() {
-        self.value.isSuccess
-    }
-}
-
 // MARK: - Tests.
 
 class TestSQLiteBookmarks: XCTestCase {
@@ -207,7 +192,7 @@ class TestSQLiteBookmarks: XCTestCase {
             "folderCCCCCC", "bookmark2002", 0,
         ]
 
-        self.moveLocalToMirror(db)   // So we have the roots.
+        db.moveLocalToMirrorForTesting()   // So we have the roots.
         db.run([
             (sql: mirrorQuery, args: mirrorArgs),
             (sql: structureQuery, args: structureArgs),
@@ -639,7 +624,7 @@ class TestSQLiteBookmarks: XCTestCase {
         XCTAssertEqual(positionsAfterDelete[rowB.guid], 0)
 
         // Manually shuffle all of these into the mirror, as if we were fully synchronized.
-        self.moveLocalToMirror(db)
+        db.moveLocalToMirrorForTesting()
         XCTAssertEqual([], db.getGUIDs("SELECT guid FROM \(TableBookmarksLocal) ORDER BY id"))
         XCTAssertEqual([], db.getGUIDs("SELECT child FROM \(TableBookmarksLocalStructure)"))
         XCTAssertEqual(rootGUIDs + [rowB.guid], db.getGUIDs("SELECT guid FROM \(TableBookmarksMirror) ORDER BY id"))
@@ -695,34 +680,6 @@ class TestSQLiteBookmarks: XCTestCase {
         // The mirror structure is unchanged after all this.
         XCTAssertEqual(rootGUIDs + [rowB.guid], db.getGUIDs("SELECT guid FROM \(TableBookmarksMirror) ORDER BY id"))
         XCTAssertEqual([rowB.guid], db.getGUIDs("SELECT child FROM \(TableBookmarksMirrorStructure) WHERE parent = '\(BookmarkRoots.MobileFolderGUID)' ORDER BY idx"))
-    }
-
-    private func moveLocalToMirror(db: BrowserDB) {
-        // This is a risky process -- it's not the same logic that the real synchronizer uses
-        // (because I haven't written it yet), so it might end up lying. We do what we can.
-        let overrideSQL = "INSERT OR IGNORE INTO \(TableBookmarksMirror) " +
-                          "(guid, type, bmkUri, title, parentid, parentName, feedUri, siteUri, pos," +
-                          " description, tags, keyword, folderName, queryId, " +
-                          " is_overridden, server_modified, faviconID) " +
-                          "SELECT guid, type, bmkUri, title, parentid, parentName, " +
-                          "feedUri, siteUri, pos, description, tags, keyword, folderName, queryId, " +
-                          "0 AS is_overridden, \(NSDate.now()) AS server_modified, faviconID " +
-                          "FROM \(TableBookmarksLocal)"
-
-        // Copy its mirror structure.
-        let copySQL = "INSERT INTO \(TableBookmarksMirrorStructure) " +
-                      "SELECT * FROM \(TableBookmarksLocalStructure)"
-
-        // Throw away the old.
-        let deleteLocalStructureSQL = "DELETE FROM \(TableBookmarksLocalStructure)"
-        let deleteLocalSQL = "DELETE FROM \(TableBookmarksLocal)"
-
-        db.run([
-            overrideSQL,
-            copySQL,
-            deleteLocalStructureSQL,
-            deleteLocalSQL,
-        ]).succeeded()
     }
 
     /*
