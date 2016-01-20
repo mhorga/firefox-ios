@@ -29,8 +29,37 @@ public extension SetGenerator {
 }
 
 public extension Set {
+    func withSubsetsOfSize(n: Int, f: Set<Generator.Element> -> ()) {
+        precondition(n > 0)
+
+        if self.isEmpty {
+            return
+        }
+
+        if n > self.count {
+            f(self)
+            return
+        }
+
+        if n == 1 {
+            self.forEach { f(Set([$0])) }
+            return
+        }
+
+        var generator = self.generate()
+        while let next = generator.take(n) {
+            if !next.isEmpty {
+                f(Set(next))
+            }
+        }
+    }
+
     func subsetsOfSize(n: Int) -> [Set<Generator.Element>] {
         precondition(n > 0)
+
+        if self.isEmpty {
+            return []
+        }
 
         if n > self.count {
             return [self]
@@ -45,7 +74,9 @@ public extension Set {
         var out: [Set<Generator.Element>] = []
         out.reserveCapacity(self.count / n)
         while let next = generator.take(n) {
-            out.append(Set(next))
+            if !next.isEmpty {
+                out.append(Set(next))
+            }
         }
         return out
     }
