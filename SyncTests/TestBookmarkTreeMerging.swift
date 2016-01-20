@@ -17,6 +17,27 @@ extension Dictionary {
     }
 }
 
+class MockItemSource: MirrorItemSource {
+    var items: [GUID: BookmarkMirrorItem] = [:]
+
+    func getBufferItemsWithGUIDs(guids: [GUID]) -> Deferred<Maybe<[GUID: BookmarkMirrorItem]>> {
+        var acc: [GUID: BookmarkMirrorItem] = [:]
+        guids.forEach { guid in
+            if let item = self.items[guid] {
+                acc[guid] = item
+            }
+        }
+        return deferMaybe(acc)
+    }
+
+    func getBufferItemWithGUID(guid: GUID) -> Deferred<Maybe<BookmarkMirrorItem>> {
+        guard let item = self.items[guid] else {
+            return deferMaybe(DatabaseError(description: "Couldn't find item \(guid)."))
+        }
+        return deferMaybe(item)
+    }
+}
+
 class MockUploader: BookmarkStorer {
     var deletions: Set<GUID> = Set<GUID>()
     var added: Set<GUID> = Set<GUID>()
@@ -121,7 +142,7 @@ class TestBookmarkTreeMerging: XCTestCase {
         let m = BookmarkTree.emptyTree()
         let l = BookmarkTree.emptyTree()
 
-        let merger = ThreeWayTreeMerger(local: l, mirror: m, remote: r)
+        let merger = ThreeWayTreeMerger(local: l, mirror: m, remote: r, itemSource: MockItemSource())
         guard let result = merger.merge().value.successValue else {
             XCTFail("Couldn't merge.")
             return
@@ -135,7 +156,7 @@ class TestBookmarkTreeMerging: XCTestCase {
         let m = BookmarkTree.emptyTree()
         let l = self.localTree()
 
-        let merger = ThreeWayTreeMerger(local: l, mirror: m, remote: r)
+        let merger = ThreeWayTreeMerger(local: l, mirror: m, remote: r, itemSource: MockItemSource())
         guard let result = merger.merge().value.successValue else {
             XCTFail("Couldn't merge.")
             return
