@@ -280,10 +280,10 @@ public class SQLiteLogins: BrowserLogins {
         let args: Args
         let usernameMatch: String
         if let username = username {
-            args = [protectionSpace.host, username, protectionSpace.host, username]
+            args = [protectionSpace.urlString(), username, protectionSpace.urlString(), username]
             usernameMatch = "username = ?"
         } else {
-            args = [protectionSpace.host, protectionSpace.host]
+            args = [protectionSpace.urlString(), protectionSpace.urlString()]
             usernameMatch = "username IS NULL"
         }
 
