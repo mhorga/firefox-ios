@@ -90,7 +90,6 @@
 		28532BE91C471FFB000072D9 /* ResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FEBABAE1AB3659000DB5728 /* ResultTests.swift */; };
 		28532BEA1C472008000072D9 /* DeferredTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28786E541AB0F5FA009EA9EF /* DeferredTests.swift */; };
 		28532BEB1C472015000072D9 /* UtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A6CE891AC082E200C1A2D4 /* UtilsTests.swift */; };
-		28532D0C1C4837F1000072D9 /* SetExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28532D0B1C4837F1000072D9 /* SetExtensions.swift */; };
 		28532CC11C473977000072D9 /* MockFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCAE2791ABB533A00877008 /* MockFiles.swift */; };
 		28532CE61C48098D000072D9 /* ThreeWayTreeMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28532CE51C48098D000072D9 /* ThreeWayTreeMerger.swift */; };
 		28532D0C1C4837F1000072D9 /* SetExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28532D0B1C4837F1000072D9 /* SetExtensions.swift */; };
